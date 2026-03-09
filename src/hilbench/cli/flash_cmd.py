@@ -35,12 +35,7 @@ def flash(
 
     if ctx.dry_run:
         probe = probe_factory(target.probe)
-        cmd = ["edbg", "-t", "samd51"]
-        if verify:
-            cmd += ["-pv"]
-        else:
-            cmd += ["-p"]
-        cmd += ["-f", str(fw_path)]
+        cmd = probe.describe_command(fw_path, verify=verify)
         console.print(f"[yellow]dry-run:[/yellow] would execute: {' '.join(cmd)}")
         return
 

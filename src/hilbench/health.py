@@ -72,8 +72,11 @@ def check_gpio_chip(chip_path: str = "/dev/gpiochip4") -> CheckResult:
 def check_runner_service() -> CheckResult:
     """Check if the GitHub Actions runner service is active."""
     try:
+        # Use shell=True so the glob expands to the actual service name
+        # (e.g. actions.runner.MyOrg.my-bench.service).
         result = subprocess.run(
-            ["systemctl", "is-active", "actions.runner.*"],
+            "systemctl is-active actions.runner.*.service",
+            shell=True,
             capture_output=True,
             text=True,
             timeout=5,

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import click
@@ -28,7 +27,7 @@ def show(ctx: object) -> None:
     console = Console()
     cfg = ctx.config
     rendered = yaml.dump(
-        json.loads(cfg.model_dump_json()),
+        cfg.model_dump(mode="json"),
         default_flow_style=False,
         sort_keys=False,
     )

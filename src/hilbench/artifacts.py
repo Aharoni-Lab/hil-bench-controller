@@ -25,13 +25,11 @@ def resolve_firmware_path(
     """
     path = Path(firmware)
 
-    # Absolute path
+    # Absolute path — trust the caller to handle missing files
     if path.is_absolute():
-        if path.exists():
-            return path
-        raise ArtifactError(f"firmware not found: {path}")
+        return path
 
-    # Relative to workspace
+    # Relative to workspace — check direct match first, then try glob
     resolved = workspace / path
     if resolved.exists():
         return resolved

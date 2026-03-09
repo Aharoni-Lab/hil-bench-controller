@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import logging
 import subprocess
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from hilbench.probe import probe_factory
 
@@ -21,6 +21,11 @@ class CheckResult:
     name: str
     passed: bool
     detail: str
+
+
+def results_to_dicts(results: list[CheckResult]) -> list[dict[str, Any]]:
+    """Convert CheckResult list to list of dicts for serialization."""
+    return [asdict(r) for r in results]
 
 
 def check_config(config: BenchConfig) -> CheckResult:

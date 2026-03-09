@@ -16,7 +16,7 @@ def publish() -> None:
 def status(ctx: object) -> None:
     """One-shot health check and publish to Supabase."""
     from hilbench.cli.main import Context
-    from hilbench.health import run_all_checks
+    from hilbench.health import results_to_dicts, run_all_checks
     from hilbench.publisher._client import SupabasePublisher
     from hilbench.publisher._config import load_publisher_config
 
@@ -31,7 +31,7 @@ def status(ctx: object) -> None:
 
     results = run_all_checks(cfg)
     all_passed = all(r.passed for r in results)
-    checks = [{"name": r.name, "passed": r.passed, "detail": r.detail} for r in results]
+    checks = results_to_dicts(results)
     state = "idle" if all_passed else "error"
 
     publisher = SupabasePublisher(pub_config, cfg)

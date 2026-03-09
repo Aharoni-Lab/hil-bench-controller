@@ -22,10 +22,10 @@ export function BenchCard({ bench }: BenchCardProps) {
       <td>
         <strong>{bench.bench_name}</strong>
         {bench.hostname && bench.hostname !== bench.bench_name && (
-          <br />
-        )}
-        {bench.hostname && bench.hostname !== bench.bench_name && (
-          <small>{bench.hostname}</small>
+          <>
+            <br />
+            <small>{bench.hostname}</small>
+          </>
         )}
       </td>
       <td>

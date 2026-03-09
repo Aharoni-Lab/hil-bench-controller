@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from hilbench.config import BenchConfig
@@ -63,10 +63,10 @@ def on_health_complete(bench_config: BenchConfig, results: list[CheckResult]) ->
     pub = _get_publisher(bench_config)
     if pub is None:
         return
+    from hilbench.health import results_to_dicts
+
     all_passed = all(r.passed for r in results)
-    checks: list[dict[str, Any]] = [
-        {"name": r.name, "passed": r.passed, "detail": r.detail} for r in results
-    ]
+    checks = results_to_dicts(results)
     state = "idle" if all_passed else "error"
     pub.publish_status(state=state, healthy=all_passed, checks=checks)
     pub.publish_event("health_check", {"healthy": all_passed, "checks": checks})

@@ -33,7 +33,7 @@ class TestHeartbeatLoop:
             return [CheckResult(name="config", passed=True, detail="ok")]
 
         with (
-            patch("hilbench.health.run_all_checks", side_effect=mock_run_all_checks),
+            patch("hilbench.publisher._heartbeat.run_all_checks", side_effect=mock_run_all_checks),
             patch("hilbench.publisher._heartbeat.time.sleep"),
         ):
             run_heartbeat_loop(mock_publisher, bench_config, interval_s=1)
@@ -56,7 +56,7 @@ class TestHeartbeatLoop:
             return [CheckResult(name="config", passed=True, detail="ok")]
 
         with (
-            patch("hilbench.health.run_all_checks", side_effect=mock_run_all_checks),
+            patch("hilbench.publisher._heartbeat.run_all_checks", side_effect=mock_run_all_checks),
             patch("hilbench.publisher._heartbeat.time.sleep"),
         ):
             run_heartbeat_loop(mock_publisher, bench_config, interval_s=1)

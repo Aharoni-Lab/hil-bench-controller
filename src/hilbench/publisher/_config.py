@@ -25,10 +25,11 @@ class PublisherConfig(BaseModel):
     enabled: bool = True
 
 
-def _load_env_file(path: Path) -> None:
-    """Minimal .env loader — sets env vars that are not already set."""
+def _load_env_file(path: Path) -> dict[str, str]:
+    """Minimal .env loader — returns dict without mutating os.environ."""
+    env_vars: dict[str, str] = {}
     if not path.is_file():
-        return
+        return env_vars
     for line in path.read_text().splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
@@ -36,27 +37,32 @@ def _load_env_file(path: Path) -> None:
         if "=" not in line:
             continue
         key, _, value = line.partition("=")
-        key = key.strip()
-        value = value.strip()
-        os.environ.setdefault(key, value)
+        env_vars[key.strip()] = value.strip()
+    return env_vars
+
+
+def _get(key: str, file_vars: dict[str, str], default: str = "") -> str:
+    """Get a value from env vars, falling back to file values."""
+    return os.environ.get(key) or file_vars.get(key, default)
 
 
 def load_publisher_config(env_path: Path | None = None) -> PublisherConfig | None:
     """Load publisher config from env file then env vars.
 
     Returns None if required variables (SUPABASE_URL, SUPABASE_KEY) are missing.
+    Environment variables take precedence over file values.
     """
     path = env_path or DEFAULT_ENV_PATH
-    _load_env_file(path)
+    file_vars = _load_env_file(path)
 
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_KEY")
+    url = _get("SUPABASE_URL", file_vars)
+    key = _get("SUPABASE_KEY", file_vars)
     if not url or not key:
         logger.debug("Publisher not configured: SUPABASE_URL/SUPABASE_KEY missing")
         return None
 
-    email = os.environ.get("BENCH_EMAIL", "")
-    password = os.environ.get("BENCH_PASSWORD", "")
+    email = _get("BENCH_EMAIL", file_vars)
+    password = _get("BENCH_PASSWORD", file_vars)
     if not email or not password:
         logger.debug("Publisher not configured: BENCH_EMAIL/BENCH_PASSWORD missing")
         return None
@@ -66,7 +72,8 @@ def load_publisher_config(env_path: Path | None = None) -> PublisherConfig | Non
         supabase_key=key,
         bench_email=email,
         bench_password=password,
-        heartbeat_interval_s=int(os.environ.get("HEARTBEAT_INTERVAL_S", "60")),
-        publish_events=os.environ.get("PUBLISH_EVENTS", "false").lower() in ("true", "1", "yes"),
-        enabled=os.environ.get("PUBLISHER_ENABLED", "true").lower() in ("true", "1", "yes"),
+        heartbeat_interval_s=int(_get("HEARTBEAT_INTERVAL_S", file_vars, "60")),
+        publish_events=_get("PUBLISH_EVENTS", file_vars, "false").lower()
+        in ("true", "1", "yes"),
+        enabled=_get("PUBLISHER_ENABLED", file_vars, "true").lower() in ("true", "1", "yes"),
     )

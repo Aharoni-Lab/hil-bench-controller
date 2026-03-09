@@ -65,7 +65,7 @@ class TestLoadPublisherConfig:
         )
         result = load_publisher_config(env_path=env_file)
         assert result is not None
-        # setdefault in _load_env_file means env vars win
+        # env vars take precedence over file values
         assert result.supabase_url == "https://env.supabase.co"
 
     def test_defaults(self, monkeypatch: object) -> None:

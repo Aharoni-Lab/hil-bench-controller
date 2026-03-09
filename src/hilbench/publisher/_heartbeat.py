@@ -7,6 +7,8 @@ import signal
 import time
 from typing import TYPE_CHECKING, Any
 
+from hilbench.health import run_all_checks, results_to_dicts
+
 if TYPE_CHECKING:
     from hilbench.config import BenchConfig
     from hilbench.publisher._client import SupabasePublisher
@@ -34,13 +36,9 @@ def run_heartbeat_loop(
 
     while not shutdown:
         try:
-            from hilbench.health import run_all_checks
-
             results = run_all_checks(bench_config)
             all_passed = all(r.passed for r in results)
-            checks: list[dict[str, Any]] = [
-                {"name": r.name, "passed": r.passed, "detail": r.detail} for r in results
-            ]
+            checks = results_to_dicts(results)
             state = "idle" if all_passed else "error"
             publisher.publish_status(state=state, healthy=all_passed, checks=checks)
             publisher.publish_event("heartbeat", {"healthy": all_passed, "checks": checks})

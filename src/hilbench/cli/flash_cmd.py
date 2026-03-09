@@ -56,7 +56,7 @@ def flash(
         from hilbench.publisher import on_flash_start
 
         on_flash_start(cfg, name, str(fw_path))
-    except (ImportError, Exception):
+    except ImportError:
         pass
 
     try:
@@ -66,7 +66,7 @@ def flash(
             from hilbench.publisher import on_flash_end
 
             on_flash_end(cfg, name, False, 0.0)
-        except (ImportError, Exception):
+        except ImportError:
             pass
         raise
 
@@ -74,7 +74,7 @@ def flash(
         from hilbench.publisher import on_flash_end
 
         on_flash_end(cfg, name, True, result.duration_s)
-    except (ImportError, Exception):
+    except ImportError:
         pass
 
     console.print(f"[green]Success:[/green] {result.message} ({result.duration_s:.1f}s)")

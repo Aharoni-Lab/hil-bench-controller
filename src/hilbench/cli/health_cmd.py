@@ -8,7 +8,7 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from hilbench.health import run_all_checks
+from hilbench.health import results_to_dicts, run_all_checks
 
 
 @click.command()
@@ -27,14 +27,13 @@ def health(ctx: object, as_json: bool) -> None:
         from hilbench.publisher import on_health_complete
 
         on_health_complete(cfg, results)
-    except (ImportError, Exception):
+    except ImportError:
         pass
 
     all_passed = all(r.passed for r in results)
 
     if as_json:
-        data = [{"name": r.name, "passed": r.passed, "detail": r.detail} for r in results]
-        click.echo(json.dumps({"healthy": all_passed, "checks": data}, indent=2))
+        click.echo(json.dumps({"healthy": all_passed, "checks": results_to_dicts(results)}, indent=2))
     else:
         table = Table(title=f"Health: {cfg.bench_name}")
         table.add_column("Check", style="bold")

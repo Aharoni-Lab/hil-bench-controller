@@ -22,6 +22,7 @@ echo ""
 "${SCRIPT_DIR}/install_udev_rules.sh" "$REPO_DIR"
 "${SCRIPT_DIR}/install_python_env.sh" "$REPO_DIR"
 "${SCRIPT_DIR}/generate_local_config.sh" "$BENCH_NAME" "$REPO_DIR"
+"${SCRIPT_DIR}/install_health_timer.sh" "$REPO_DIR"
 
 if [[ -n "$GITHUB_TOKEN" ]]; then
     "${SCRIPT_DIR}/install_runner.sh" "$BENCH_NAME" "$GITHUB_TOKEN"

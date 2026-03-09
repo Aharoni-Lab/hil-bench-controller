@@ -73,7 +73,6 @@ def load_publisher_config(env_path: Path | None = None) -> PublisherConfig | Non
         bench_email=email,
         bench_password=password,
         heartbeat_interval_s=int(_get("HEARTBEAT_INTERVAL_S", file_vars, "60")),
-        publish_events=_get("PUBLISH_EVENTS", file_vars, "false").lower()
-        in ("true", "1", "yes"),
+        publish_events=_get("PUBLISH_EVENTS", file_vars, "false").lower() in ("true", "1", "yes"),
         enabled=_get("PUBLISHER_ENABLED", file_vars, "true").lower() in ("true", "1", "yes"),
     )

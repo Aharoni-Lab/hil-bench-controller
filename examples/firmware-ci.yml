@@ -1,0 +1,71 @@
+# Example GitHub Actions workflow for firmware repos that use HIL bench testing.
+# Copy this to your firmware repo at .github/workflows/hil-test.yml and customize.
+
+name: Build & HIL Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Only one HIL test per bench at a time
+concurrency:
+  group: hil-samd51-bench01
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build firmware
+        run: |
+          # Replace with your build command
+          make build
+          # Output: build/firmware.bin
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: build/firmware.bin
+          retention-days: 1
+
+  hil-test:
+    needs: build
+    # Target a specific bench by its runner labels
+    runs-on: [self-hosted, linux, ARM64, hil, samd51, bench01]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: firmware
+
+      - name: Flash firmware
+        run: |
+          benchctl flash \
+            --firmware firmware.bin \
+            --target samd51 \
+            --verify
+
+      - name: Wait for boot
+        run: |
+          benchctl serial expect \
+            --target samd51 \
+            --pattern "BOOT OK" \
+            --timeout 15
+
+      - name: Run self-test
+        run: |
+          benchctl serial send \
+            --target samd51 \
+            "RUN_SELF_TEST"
+          benchctl serial expect \
+            --target samd51 \
+            --pattern "SELF_TEST PASS" \
+            --timeout 30
+
+      - name: Check fault pin
+        run: |
+          # Verify no fault condition
+          benchctl gpio get --pin fault --target samd51

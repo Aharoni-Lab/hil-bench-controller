@@ -1,0 +1,43 @@
+# HIL Bench Controller — Configuration Template
+# Copy to /etc/hil-bench/config.yaml and customize for your bench.
+# Override path via --config flag or HIL_BENCH_CONFIG env var.
+
+bench_name: my-bench-01          # unique bench identifier
+hostname: my-bench-01            # optional — set by bootstrap
+
+runner:
+  labels:
+    - self-hosted
+    - linux
+    - ARM64
+    - hil
+    # Add target-specific labels, e.g.:
+    # - samd51
+    # - bench01
+
+targets:
+  # Each key is a target name used with --target flag
+  my_target:
+    family: samd51               # MCU family
+    probe:
+      type: edbg                 # edbg or openocd
+      device_path: /dev/atmel-ice-0
+      serial_number: null        # optional — for multi-probe setups
+    serial:
+      device_path: /dev/serial/by-id/usb-FTDI-if00
+      baud_rate: 115200
+      timeout: 1.0
+    gpio:
+      reset: { line: 17 }
+      ready: { line: 27 }
+      fault: { line: 22 }
+    power:
+      type: none                 # none or relay
+      relay_pin: null            # e.g. { line: 4 } if type=relay
+
+paths:
+  workspace: /opt/hil-bench
+  log_dir: /var/log/hil-bench
+
+wiki:
+  canonical_url: null            # optional wiki link

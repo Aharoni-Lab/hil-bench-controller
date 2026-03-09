@@ -1,0 +1,10 @@
+[Unit]
+Description=HIL Bench Health Check
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/hil-bench/venv/bin/benchctl health --json
+User=root
+StandardOutput=append:/var/log/hil-bench/health.log
+StandardError=append:/var/log/hil-bench/health.log

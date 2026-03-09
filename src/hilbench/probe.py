@@ -154,8 +154,8 @@ def probe_factory(config: ProbeConfig) -> Probe:
     """Create the appropriate probe from config."""
     match config.type:
         case "edbg":
-            return EdbgProbe(config)  # type: ignore[return-value]
+            return EdbgProbe(config)
         case "openocd":
-            return OpenOCDProbe(config)  # type: ignore[return-value]
+            return OpenOCDProbe(config)
         case _:
             raise ProbeError(f"unknown probe type: {config.type!r}")

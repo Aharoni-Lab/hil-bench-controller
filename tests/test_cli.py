@@ -27,7 +27,7 @@ class TestCli:
     def test_subcommands_present(self) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, ["--help"])
-        for cmd in ["flash", "serial", "gpio", "health", "config"]:
+        for cmd in ["flash", "serial", "gpio", "health", "config", "publish"]:
             assert cmd in result.output
 
     def test_config_validate(self, sample_config_path: Path) -> None:
@@ -114,3 +114,9 @@ class TestCli:
         result = runner.invoke(cli, ["health"])
         # Should fail — no config at default path
         assert result.exit_code != 0
+
+    def test_publish_config_no_env(self) -> None:
+        runner = CliRunner()
+        result = runner.invoke(cli, ["publish", "config"])
+        assert result.exit_code == 0
+        assert "not configured" in result.output.lower()

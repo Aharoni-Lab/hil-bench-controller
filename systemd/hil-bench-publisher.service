@@ -1,0 +1,17 @@
+[Unit]
+Description=HIL Bench Supabase Publisher (heartbeat)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/hil-bench/venv/bin/benchctl publish heartbeat
+EnvironmentFile=/etc/hil-bench/supabase.env
+User=root
+Restart=on-failure
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

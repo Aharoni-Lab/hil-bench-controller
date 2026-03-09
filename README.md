@@ -39,6 +39,12 @@ benchctl gpio get --pin fault --target samd51
 benchctl health
 ```
 
+## Status Dashboard
+
+Optional Supabase-backed remote monitoring with a GitHub Pages dashboard. Each bench publishes health status and heartbeats; authorized users can view all benches from anywhere.
+
+See [docs/dashboard-setup.md](docs/dashboard-setup.md) for setup instructions.
+
 ## CLI Reference
 
 ```
@@ -48,6 +54,7 @@ benchctl [--config PATH] [--verbose] [--dry-run]
   gpio      set|get|pulse  --pin NAME|NUM --value high|low
   health    [--json]
   config    show|validate|generate
+  publish   status|heartbeat|config
 ```
 
 ## CI Integration
@@ -84,9 +91,13 @@ src/hilbench/          Python package
   health.py            Health check logic
   artifacts.py         Firmware artifact resolution
   cli/                 Click CLI commands
+  publisher/           Supabase status publisher (optional)
 bootstrap/             Pi provisioning scripts
 configs/               Config templates
-systemd/               Health check timer
+systemd/               Health check timer + publisher service
+dashboard/             React status dashboard (Vite + Pico CSS)
+supabase/migrations/   Database schema SQL files
+docs/                  Setup and architecture docs
 udev/                  Device permission rules
 ```
 

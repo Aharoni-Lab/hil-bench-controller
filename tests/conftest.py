@@ -55,3 +55,12 @@ def sample_config():
     from hilbench.config import BenchConfig
 
     return BenchConfig.model_validate(SAMPLE_CONFIG)
+
+
+@pytest.fixture()
+def publisher_env(monkeypatch):
+    """Set publisher env vars for testing."""
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "test-anon-key")
+    monkeypatch.setenv("BENCH_EMAIL", "bench@test.com")
+    monkeypatch.setenv("BENCH_PASSWORD", "test-password")

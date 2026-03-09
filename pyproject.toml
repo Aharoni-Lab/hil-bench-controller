@@ -21,6 +21,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+publisher = ["supabase>=2.11"]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
@@ -29,6 +30,7 @@ dev = [
     "mypy>=1.13",
     "types-PyYAML",
     "types-pyserial",
+    "supabase>=2.11",
 ]
 
 [project.scripts]
@@ -52,6 +54,10 @@ warn_unused_configs = true
 
 [[tool.mypy.overrides]]
 module = ["gpiod.*", "serial.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["supabase.*", "gotrue.*", "postgrest.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

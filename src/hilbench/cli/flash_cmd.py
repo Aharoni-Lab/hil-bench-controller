@@ -51,5 +51,30 @@ def flash(
     # Flash
     probe = probe_factory(target.probe)
     console.print("Flashing...")
-    result = probe.flash(fw_path, verify=verify)
+
+    try:
+        from hilbench.publisher import on_flash_start
+
+        on_flash_start(cfg, name, str(fw_path))
+    except (ImportError, Exception):
+        pass
+
+    try:
+        result = probe.flash(fw_path, verify=verify)
+    except Exception:
+        try:
+            from hilbench.publisher import on_flash_end
+
+            on_flash_end(cfg, name, False, 0.0)
+        except (ImportError, Exception):
+            pass
+        raise
+
+    try:
+        from hilbench.publisher import on_flash_end
+
+        on_flash_end(cfg, name, True, result.duration_s)
+    except (ImportError, Exception):
+        pass
+
     console.print(f"[green]Success:[/green] {result.message} ({result.duration_s:.1f}s)")

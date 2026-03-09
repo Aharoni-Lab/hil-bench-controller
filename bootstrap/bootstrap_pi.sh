@@ -7,8 +7,10 @@
 
 set -euo pipefail
 
-BENCH_NAME="${1:?Usage: $0 <bench-name> [github-org-token]}"
+BENCH_NAME="${1:?Usage: $0 <bench-name> [github-org-token] [supabase-url] [supabase-key]}"
 GITHUB_TOKEN="${2:-}"
+SUPABASE_URL="${3:-}"
+SUPABASE_KEY="${4:-}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
@@ -29,6 +31,13 @@ if [[ -n "$GITHUB_TOKEN" ]]; then
 else
     echo "--- Skipping runner install (no token provided) ---"
     echo "Run manually: sudo ${SCRIPT_DIR}/install_runner.sh $BENCH_NAME <token>"
+fi
+
+if [[ -n "$SUPABASE_URL" ]] && [[ -n "$SUPABASE_KEY" ]]; then
+    "${SCRIPT_DIR}/install_publisher.sh" "$REPO_DIR" "$SUPABASE_URL" "$SUPABASE_KEY"
+else
+    echo "--- Skipping publisher install (no Supabase URL/key provided) ---"
+    echo "Run manually: sudo ${SCRIPT_DIR}/install_publisher.sh $REPO_DIR <url> <key>"
 fi
 
 echo ""

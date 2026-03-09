@@ -22,6 +22,14 @@ def health(ctx: object, as_json: bool) -> None:
     console = Console()
     cfg = ctx.config
     results = run_all_checks(cfg)
+
+    try:
+        from hilbench.publisher import on_health_complete
+
+        on_health_complete(cfg, results)
+    except (ImportError, Exception):
+        pass
+
     all_passed = all(r.passed for r in results)
 
     if as_json:

@@ -35,3 +35,13 @@ Thumbs.db
 *.bin
 *.hex
 *.elf
+
+# Dashboard
+dashboard/node_modules/
+dashboard/dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+/configs/supabase.env

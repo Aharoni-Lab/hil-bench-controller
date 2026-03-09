@@ -1,0 +1,32 @@
+# Example: SAMD51 bench with Atmel-ICE probe
+bench_name: aharoni-samd51-bench-01
+hostname: aharoni-samd51-bench-01
+
+runner:
+  labels: [self-hosted, linux, ARM64, hil, samd51, bench01]
+
+targets:
+  samd51:
+    family: samd51
+    probe:
+      type: edbg
+      device_path: /dev/atmel-ice-0
+      serial_number: J41800000000
+    serial:
+      device_path: /dev/serial/by-id/usb-FTDI-if00
+      baud_rate: 115200
+      timeout: 1.0
+    gpio:
+      reset: { line: 17 }
+      ready: { line: 27 }
+      fault: { line: 22 }
+    power:
+      type: none
+      relay_pin: null
+
+paths:
+  workspace: /opt/hil-bench
+  log_dir: /var/log/hil-bench
+
+wiki:
+  canonical_url: https://wiki.aharoni-lab.com/HIL/Bench/aharoni-samd51-bench-01

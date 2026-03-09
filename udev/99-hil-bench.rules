@@ -1,0 +1,13 @@
+# HIL Bench Controller — udev rules
+# Provides stable device names and permissions for bench hardware.
+
+# Atmel-ICE JTAG/SWD programmer (Microchip/Atmel VID:PID 03eb:2141)
+SUBSYSTEM=="usb", ATTR{idVendor}=="03eb", ATTR{idProduct}=="2141", \
+    MODE="0666", \
+    SYMLINK+="atmel-ice-%n", \
+    TAG+="hil-bench"
+
+# FTDI USB-serial adapters (common for target UART)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", \
+    MODE="0666", \
+    TAG+="hil-bench"

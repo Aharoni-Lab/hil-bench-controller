@@ -25,7 +25,17 @@ For each bench Pi, create a user in Supabase Auth:
 
 The `bench_name` in metadata must match the `bench_name` in the bench's `config.yaml`.
 
-## 4. Configure Each Pi
+## 4. Create Dashboard Viewer Accounts
+
+For anyone who needs to view the dashboard (but not publish data):
+
+1. Go to Authentication → Users → Add user
+2. Set email and password
+3. No user metadata is needed — any authenticated user can view all benches
+
+Viewer accounts are read-only. The RLS policies only allow writes from accounts with a matching `bench_name` in their metadata.
+
+## 5. Configure Each Pi
 
 On each Pi, create `/etc/hil-bench/supabase.env`:
 
@@ -48,7 +58,7 @@ Or use the bootstrap script:
 sudo ./bootstrap/install_publisher.sh /path/to/repo https://your-project.supabase.co your-anon-key
 ```
 
-## 5. Install and Start Publisher
+## 6. Install and Start Publisher
 
 ```bash
 # Install supabase package
@@ -61,7 +71,7 @@ benchctl publish status
 sudo systemctl enable --now hil-bench-publisher
 ```
 
-## 6. Deploy Dashboard
+## 7. Deploy Dashboard
 
 ### GitHub Pages (recommended)
 
@@ -87,7 +97,7 @@ npm install
 npm run dev
 ```
 
-## 7. Verify
+## 8. Verify
 
 1. Check bench registration: `benchctl publish config`
 2. Run one-shot publish: `benchctl publish status`

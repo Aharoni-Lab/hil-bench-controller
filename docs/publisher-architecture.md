@@ -27,7 +27,7 @@ src/hilbench/publisher/
 
 ## Hook Integration
 
-CLI commands call publisher hooks wrapped in `try/except (ImportError, Exception)`:
+CLI commands call publisher hooks wrapped in `try/except ImportError`:
 
 - **flash_cmd.py**: `on_flash_start` before flash, `on_flash_end` after (success or failure)
 - **health_cmd.py**: `on_health_complete` after health checks

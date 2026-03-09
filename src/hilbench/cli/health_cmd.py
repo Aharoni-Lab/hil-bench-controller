@@ -33,7 +33,8 @@ def health(ctx: object, as_json: bool) -> None:
     all_passed = all(r.passed for r in results)
 
     if as_json:
-        click.echo(json.dumps({"healthy": all_passed, "checks": results_to_dicts(results)}, indent=2))
+        data = {"healthy": all_passed, "checks": results_to_dicts(results)}
+        click.echo(json.dumps(data, indent=2))
     else:
         table = Table(title=f"Health: {cfg.bench_name}")
         table.add_column("Check", style="bold")

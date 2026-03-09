@@ -7,7 +7,7 @@ import signal
 import time
 from typing import TYPE_CHECKING, Any
 
-from hilbench.health import run_all_checks, results_to_dicts
+from hilbench.health import results_to_dicts, run_all_checks
 
 if TYPE_CHECKING:
     from hilbench.config import BenchConfig

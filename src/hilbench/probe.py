@@ -47,9 +47,7 @@ def _subprocess_ok(cmd: list[str], timeout: int = 5) -> bool:
         return False
 
 
-def _run_flash(
-    cmd: list[str], tool_name: str, *, output_field: str = "stdout"
-) -> FlashResult:
+def _run_flash(cmd: list[str], tool_name: str, *, output_field: str = "stdout") -> FlashResult:
     """Run a flash subprocess and return a ``FlashResult``.
 
     *output_field* selects which stream (``"stdout"`` or ``"stderr"``)
@@ -57,9 +55,7 @@ def _run_flash(
     """
     start = time.monotonic()
     try:
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=_FLASH_TIMEOUT
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=_FLASH_TIMEOUT)
         elapsed = time.monotonic() - start
     except subprocess.TimeoutExpired as exc:
         raise FlashError(f"{tool_name} flash timed out after {_FLASH_TIMEOUT}s") from exc
@@ -67,9 +63,7 @@ def _run_flash(
         raise FlashError(f"{tool_name} not found — is it installed?") from exc
 
     if result.returncode != 0:
-        raise FlashError(
-            f"{tool_name} failed (rc={result.returncode}): {result.stderr.strip()}"
-        )
+        raise FlashError(f"{tool_name} failed (rc={result.returncode}): {result.stderr.strip()}")
 
     msg = getattr(result, output_field).strip() or "flash complete"
     return FlashResult(success=True, message=msg, duration_s=elapsed, command=cmd)
@@ -113,15 +107,16 @@ class OpenOCDProbe:
 
     def describe_command(self, firmware: Path, *, verify: bool = True) -> list[str]:
         program_arg = (
-            f"program {firmware} verify reset exit"
-            if verify
-            else f"program {firmware} reset exit"
+            f"program {firmware} verify reset exit" if verify else f"program {firmware} reset exit"
         )
         return [
             "openocd",
-            "-f", "interface/cmsis-dap.cfg",
-            "-f", "target/atsame5x.cfg",
-            "-c", program_arg,
+            "-f",
+            "interface/cmsis-dap.cfg",
+            "-f",
+            "target/atsame5x.cfg",
+            "-c",
+            program_arg,
         ]
 
     def flash(self, firmware: Path, *, verify: bool = True) -> FlashResult:

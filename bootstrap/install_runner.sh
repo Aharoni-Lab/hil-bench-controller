@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Download and configure GitHub Actions runner at org scope (Aharoni-Lab).
+# Download and configure GitHub Actions runner at org scope.
 set -euo pipefail
 
-BENCH_NAME="${1:?Usage: $0 <bench-name> <github-token>}"
-GITHUB_TOKEN="${2:?Usage: $0 <bench-name> <github-token>}"
+BENCH_NAME="${1:?Usage: $0 <bench-name> <github-token> <github-org>}"
+GITHUB_TOKEN="${2:?Usage: $0 <bench-name> <github-token> <github-org>}"
+ORG="${3:?Usage: $0 <bench-name> <github-token> <github-org>}"
 
 RUNNER_DIR="/opt/hil-bench/actions-runner"
 RUNNER_VERSION="2.321.0"
-ORG="Aharoni-Lab"
 
 echo "--- Installing GitHub Actions runner (org: ${ORG}) ---"
 

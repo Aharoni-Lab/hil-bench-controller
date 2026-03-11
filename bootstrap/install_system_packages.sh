@@ -7,7 +7,7 @@ echo "--- Installing system packages ---"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq \
-    libgpiod2 \
+    gpiod \
     libgpiod-dev \
     python3-venv \
     python3-dev \

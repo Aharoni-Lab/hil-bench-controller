@@ -179,8 +179,8 @@ With GitHub Actions runner registration:
 
 ```bash
 # Generate a runner registration token at:
-# https://github.com/organizations/Aharoni-Lab/settings/actions/runners/new
-sudo ./bootstrap/bootstrap_pi.sh hil-bench-01 ghp_YOUR_TOKEN
+# https://github.com/organizations/<your-org>/settings/actions/runners/new
+sudo ./bootstrap/bootstrap_pi.sh hil-bench-01 YOUR_TOKEN your-github-org
 ```
 
 The bootstrap script runs these steps in order (each is idempotent):

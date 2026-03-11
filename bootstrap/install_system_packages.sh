@@ -14,6 +14,7 @@ apt-get install -y -qq \
     openocd \
     git \
     build-essential \
+    libudev-dev \
     usbutils
 
 # Build edbg from source if not already installed

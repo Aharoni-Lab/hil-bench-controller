@@ -27,7 +27,7 @@ echo ""
 "${SCRIPT_DIR}/install_health_timer.sh" "$REPO_DIR"
 
 if [[ -n "$GITHUB_TOKEN" ]]; then
-    "${SCRIPT_DIR}/install_runner.sh" "$BENCH_NAME" "$GITHUB_TOKEN"
+    "${SCRIPT_DIR}/install_runner.sh" "$BENCH_NAME" "$GITHUB_TOKEN" /etc/hil-bench/config.yaml
 else
     echo "--- Skipping runner install (no token provided) ---"
     echo "Run manually: sudo ${SCRIPT_DIR}/install_runner.sh $BENCH_NAME <token>"

@@ -76,6 +76,15 @@ class WikiConfig(BaseModel):
     canonical_url: str | None = None
 
 
+class LedConfig(BaseModel):
+    enabled: bool = False
+    led_count: int = Field(default=16, ge=1, le=1000)
+    gpio_pin: int = Field(default=18, ge=0)
+    brightness: int = Field(default=128, ge=0, le=255)
+    fps: int = Field(default=30, ge=1, le=120)
+    socket_path: Path = Path("/run/hil-bench/led.sock")
+
+
 # ── Root model ──────────────────────────────────────────────────────────────
 
 
@@ -86,6 +95,7 @@ class BenchConfig(BaseModel):
     targets: dict[str, TargetConfig]
     paths: PathsConfig = PathsConfig()
     wiki: WikiConfig = WikiConfig()
+    led: LedConfig = LedConfig()
 
     def get_target(self, name: str | None = None) -> tuple[str, TargetConfig]:
         """Return (name, config) for the named target, or the only target if name is None."""

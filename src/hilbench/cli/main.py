@@ -58,6 +58,7 @@ from hilbench.cli.config_cmd import config_cmd  # noqa: E402
 from hilbench.cli.flash_cmd import flash  # noqa: E402
 from hilbench.cli.gpio_cmd import gpio  # noqa: E402
 from hilbench.cli.health_cmd import health  # noqa: E402
+from hilbench.cli.led_cmd import led  # noqa: E402
 from hilbench.cli.publish_cmd import publish  # noqa: E402
 from hilbench.cli.serial_cmd import serial  # noqa: E402
 
@@ -66,4 +67,5 @@ cli.add_command(flash)
 cli.add_command(serial)
 cli.add_command(gpio)
 cli.add_command(health)
+cli.add_command(led)
 cli.add_command(publish)

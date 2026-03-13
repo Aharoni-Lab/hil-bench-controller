@@ -51,7 +51,17 @@ echo "--- Refreshing health timer ---"
 echo "--- Refreshing udev rules ---"
 "${SCRIPT_DIR}/install_udev_rules.sh" "$REPO_DIR"
 
-# ── 6. Done ──────────────────────────────────────────────────────────────
+# ── 6. Refresh LED service ───────────────────────────────────────────
+
+LED_UNIT_SRC="${REPO_DIR}/systemd/hil-bench-led.service"
+if [[ -f "$LED_UNIT_SRC" ]]; then
+    echo "--- Refreshing LED service ---"
+    cp "$LED_UNIT_SRC" /etc/systemd/system/hil-bench-led.service
+    systemctl daemon-reload
+    echo "LED service unit refreshed"
+fi
+
+# ── 7. Done ──────────────────────────────────────────────────────────────
 
 echo ""
 echo "=== Update complete ==="

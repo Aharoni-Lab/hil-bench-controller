@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
@@ -87,8 +88,6 @@ class LedDaemon:
         except Exception:
             logger.warning("Error handling client", exc_info=True)
         finally:
-            import contextlib
-
             with contextlib.suppress(KeyError, ValueError):
                 self._sel.unregister(conn)
             conn.close()
@@ -114,18 +113,10 @@ class LedDaemon:
     def _cmd_set_scene(self, scene_name: str, params: dict[str, Any]) -> str:
         """Switch to a new scene."""
         try:
-            new_scene = get_scene(scene_name)
+            self._set_scene(scene_name, params)
         except Exception as exc:
             resp = SceneResponse(ok=False, error=str(exc))
             return resp.model_dump_json()
-
-        if self._scene is not None:
-            self._scene.teardown(self._strip)
-
-        self._scene = new_scene
-        self._scene_start_time = time.monotonic()
-        self._scene.setup(self._strip, params)
-        logger.info("Scene → %s (params=%s)", scene_name, params)
 
         resp = SceneResponse(ok=True, current_scene=scene_name)
         return resp.model_dump_json()

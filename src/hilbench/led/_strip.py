@@ -29,20 +29,19 @@ class Ws281xStrip:
         gpio_pin: int = 18,
         brightness: int = 128,
     ) -> None:
-        from rpi_ws281x import PixelStrip
+        from rpi_ws281x import Color, PixelStrip
 
         self._strip = PixelStrip(led_count, gpio_pin, brightness=brightness)
         self._strip.begin()
         self._led_count = led_count
+        self._Color = Color
 
     @property
     def num_pixels(self) -> int:
         return self._led_count
 
     def set_pixel(self, index: int, r: int, g: int, b: int) -> None:
-        from rpi_ws281x import Color
-
-        self._strip.setPixelColor(index, Color(r, g, b))
+        self._strip.setPixelColor(index, self._Color(r, g, b))
 
     def set_all(self, r: int, g: int, b: int) -> None:
         for i in range(self._led_count):

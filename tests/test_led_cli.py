@@ -38,8 +38,13 @@ class TestLedSetScene:
             result = runner.invoke(
                 cli,
                 [
-                    "--config", str(sample_config_path),
-                    "led", "set-scene", "rainbow", "--speed", "2.0",
+                    "--config",
+                    str(sample_config_path),
+                    "led",
+                    "set-scene",
+                    "rainbow",
+                    "--speed",
+                    "2.0",
                 ],
             )
         assert result.exit_code == 0
@@ -54,8 +59,13 @@ class TestLedSetScene:
             result = runner.invoke(
                 cli,
                 [
-                    "--config", str(sample_config_path),
-                    "led", "set-scene", "solid", "--color", "255,0,0",
+                    "--config",
+                    str(sample_config_path),
+                    "led",
+                    "set-scene",
+                    "solid",
+                    "--color",
+                    "255,0,0",
                 ],
             )
         assert result.exit_code == 0
@@ -91,9 +101,7 @@ class TestLedOff:
 
         runner = CliRunner()
         with patch("hilbench.led.LedClient", return_value=mock_client):
-            result = runner.invoke(
-                cli, ["--config", str(sample_config_path), "led", "off"]
-            )
+            result = runner.invoke(cli, ["--config", str(sample_config_path), "led", "off"])
         assert result.exit_code == 0
 
 
@@ -104,9 +112,7 @@ class TestLedStatus:
 
         runner = CliRunner()
         with patch("hilbench.led.LedClient", return_value=mock_client):
-            result = runner.invoke(
-                cli, ["--config", str(sample_config_path), "led", "status"]
-            )
+            result = runner.invoke(cli, ["--config", str(sample_config_path), "led", "status"])
         assert result.exit_code == 0
         assert "not running" in result.output
 
@@ -119,9 +125,7 @@ class TestLedStatus:
 
         runner = CliRunner()
         with patch("hilbench.led.LedClient", return_value=mock_client):
-            result = runner.invoke(
-                cli, ["--config", str(sample_config_path), "led", "status"]
-            )
+            result = runner.invoke(cli, ["--config", str(sample_config_path), "led", "status"])
         assert result.exit_code == 0
         assert "idle" in result.output
         assert "16" in result.output

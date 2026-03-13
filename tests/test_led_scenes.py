@@ -26,8 +26,16 @@ class TestSceneRegistry:
     def test_list_scenes_returns_all(self) -> None:
         scenes = list_scenes()
         expected = [
-            "booting", "error", "flashing", "idle", "off",
-            "progress", "rainbow", "solid", "success", "testing",
+            "booting",
+            "error",
+            "flashing",
+            "idle",
+            "off",
+            "progress",
+            "rainbow",
+            "solid",
+            "success",
+            "testing",
         ]
         assert scenes == expected
 

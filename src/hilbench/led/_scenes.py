@@ -319,9 +319,7 @@ class ProgressScene:
 
     def setup(self, strip: LedStrip, params: dict[str, Any]) -> None:
         self._color = _parse_color(params, (0, 255, 0))
-        self._bg_color = _parse_color(
-            {"color": params.get("bg_color")}, (10, 10, 10)
-        )
+        self._bg_color = _parse_color({"color": params.get("bg_color")}, (10, 10, 10))
         self._percent = float(params.get("percent", 0))
 
     def tick(self, strip: LedStrip, elapsed_ms: float) -> None:

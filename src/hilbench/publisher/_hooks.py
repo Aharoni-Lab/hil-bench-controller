@@ -15,6 +15,17 @@ logger = logging.getLogger(__name__)
 _publisher: SupabasePublisher | None = None
 
 
+def _set_led_scene(socket_path: str, scene: str, params: dict[str, object] | None = None) -> None:
+    """Best-effort LED scene change — never raises."""
+    try:
+        from hilbench.led import LedClient
+
+        client = LedClient(socket_path)
+        client.set_scene(scene, params)
+    except Exception:
+        logger.debug("LED scene change failed (daemon may not be running)", exc_info=True)
+
+
 def _get_publisher(bench_config: BenchConfig) -> SupabasePublisher | None:
     """Return (and lazily create) the module-level publisher singleton."""
     global _publisher  # noqa: PLW0603
@@ -35,6 +46,7 @@ def _get_publisher(bench_config: BenchConfig) -> SupabasePublisher | None:
 
 def on_flash_start(bench_config: BenchConfig, target_name: str, firmware: str) -> None:
     """Called before flashing begins."""
+    _set_led_scene(str(bench_config.led.socket_path), "flashing")
     pub = _get_publisher(bench_config)
     if pub is None:
         return
@@ -46,6 +58,8 @@ def on_flash_end(
     bench_config: BenchConfig, target_name: str, success: bool, duration_s: float
 ) -> None:
     """Called after flashing completes (success or failure)."""
+    led_scene = "success" if success else "error"
+    _set_led_scene(str(bench_config.led.socket_path), led_scene)
     pub = _get_publisher(bench_config)
     if pub is None:
         return
@@ -60,12 +74,14 @@ def on_flash_end(
 
 def on_health_complete(bench_config: BenchConfig, results: list[CheckResult]) -> None:
     """Called after health checks complete."""
+    all_passed = all(r.passed for r in results)
+    led_scene = "idle" if all_passed else "error"
+    _set_led_scene(str(bench_config.led.socket_path), led_scene)
     pub = _get_publisher(bench_config)
     if pub is None:
         return
     from hilbench.health import results_to_dicts
 
-    all_passed = all(r.passed for r in results)
     checks = results_to_dicts(results)
     state = "idle" if all_passed else "error"
     pub.publish_status(state=state, healthy=all_passed, checks=checks)

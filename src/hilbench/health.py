@@ -98,12 +98,31 @@ def check_runner_service() -> CheckResult:
     )
 
 
+def check_led_daemon(config: BenchConfig) -> CheckResult:
+    """Check if the LED daemon is reachable (only when LED is enabled)."""
+    if not config.led.enabled:
+        return CheckResult(name="led_daemon", passed=True, detail="disabled")
+    try:
+        from hilbench.led import LedClient
+
+        client = LedClient(config.led.socket_path)
+        running = client.is_daemon_running()
+    except Exception:
+        running = False
+    return CheckResult(
+        name="led_daemon",
+        passed=running,
+        detail="running" if running else "not reachable",
+    )
+
+
 _CHECK_RUNNERS: dict[str, Callable[[BenchConfig], list[CheckResult]]] = {
     "config": lambda cfg: [check_config(cfg)],
     "probe": check_probe,
     "serial": check_serial,
     "gpio_chip": lambda cfg: [check_gpio_chip()],
     "runner_service": lambda cfg: [check_runner_service()],
+    "led_daemon": lambda cfg: [check_led_daemon(cfg)],
 }
 
 CHECK_CATEGORIES: list[str] = list(_CHECK_RUNNERS.keys())

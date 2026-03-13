@@ -44,6 +44,8 @@ else
     echo "Run manually: sudo ${SCRIPT_DIR}/install_publisher.sh $REPO_DIR <url> <key>"
 fi
 
+"${SCRIPT_DIR}/install_led_service.sh" "$REPO_DIR"
+
 echo ""
 echo "=== Bootstrap complete for ${BENCH_NAME} ==="
 echo "Config: /etc/hil-bench/config.yaml"

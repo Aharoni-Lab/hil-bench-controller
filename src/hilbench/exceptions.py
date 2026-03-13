@@ -31,3 +31,7 @@ class HealthCheckError(HilBenchError):
 
 class ArtifactError(HilBenchError):
     """Firmware artifact not found or invalid."""
+
+
+class LedError(HilBenchError):
+    """LED strip or daemon error."""

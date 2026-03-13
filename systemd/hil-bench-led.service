@@ -1,0 +1,16 @@
+[Unit]
+Description=HIL Bench LED Status Display Daemon
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/opt/hil-bench/venv/bin/benchctl led daemon
+RuntimeDirectory=hil-bench
+User=root
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

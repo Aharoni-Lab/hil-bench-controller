@@ -30,3 +30,9 @@ paths:
 
 wiki:
   canonical_url: https://wiki.aharoni-lab.com/HIL/Bench/aharoni-samd51-bench-01
+
+led:
+  enabled: true
+  led_count: 16
+  gpio_pin: 18
+  brightness: 128

@@ -58,3 +58,11 @@ paths:
 
 wiki:
   canonical_url: null            # optional wiki link
+
+led:
+  enabled: false                 # set to true to enable WS2812B LED strip
+  led_count: 16                  # number of LEDs on the strip
+  gpio_pin: 18                   # GPIO pin (PWM0)
+  brightness: 128                # default brightness (0-255)
+  fps: 30                        # animation frame rate
+  socket_path: /run/hil-bench/led.sock

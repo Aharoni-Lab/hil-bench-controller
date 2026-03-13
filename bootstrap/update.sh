@@ -36,12 +36,7 @@ echo "Work directory: /opt/hil-bench/_work"
 
 if [[ -d "$RUNNER_DIR" ]]; then
     echo "--- Refreshing runner .env ---"
-    cat > "$RUNNER_DIR/.env" <<ENVEOF
-PATH=${VENV}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-VIRTUAL_ENV=${VENV}
-HIL_BENCH_CONFIG=${CONFIG_PATH}
-ENVEOF
-    echo "Wrote ${RUNNER_DIR}/.env"
+    "${SCRIPT_DIR}/write_runner_env.sh" "$RUNNER_DIR" "$VENV" "$CONFIG_PATH"
 else
     echo "Runner not installed — skipping .env"
 fi

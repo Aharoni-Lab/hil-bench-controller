@@ -6,6 +6,7 @@ import logging
 import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from hilbench.probe import probe_factory
@@ -14,8 +15,6 @@ if TYPE_CHECKING:
     from hilbench.config import BenchConfig
 
 logger = logging.getLogger(__name__)
-
-CHECK_CATEGORIES: list[str] = ["config", "probe", "serial", "gpio_chip", "runner_service"]
 
 
 @dataclass
@@ -98,13 +97,15 @@ def check_runner_service() -> CheckResult:
     )
 
 
-_CHECK_RUNNERS: dict[str, Any] = {
+_CHECK_RUNNERS: dict[str, Callable[[BenchConfig], list[CheckResult]]] = {
     "config": lambda cfg: [check_config(cfg)],
     "probe": check_probe,
     "serial": check_serial,
     "gpio_chip": lambda cfg: [check_gpio_chip()],
     "runner_service": lambda cfg: [check_runner_service()],
 }
+
+CHECK_CATEGORIES: list[str] = list(_CHECK_RUNNERS.keys())
 
 
 def run_checks(

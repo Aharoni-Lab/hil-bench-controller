@@ -30,8 +30,10 @@ def resolve_firmware_path(
     if path.is_absolute():
         return path
 
+    cwd = Path.cwd()
+
     # Relative to CWD first
-    cwd_resolved = Path.cwd() / path
+    cwd_resolved = cwd / path
     if cwd_resolved.exists():
         return cwd_resolved
 
@@ -43,7 +45,7 @@ def resolve_firmware_path(
     # Try glob — CWD first, then workspace
     pattern = str(firmware)
 
-    cwd_matches = sorted(Path.cwd().glob(pattern))
+    cwd_matches = sorted(cwd.glob(pattern))
     if len(cwd_matches) == 1:
         return cwd_matches[0]
     if len(cwd_matches) > 1:
@@ -56,5 +58,5 @@ def resolve_firmware_path(
         raise ArtifactError(f"ambiguous firmware path {firmware!r}: matched {len(ws_matches)} files in workspace")
 
     raise ArtifactError(
-        f"firmware {firmware!r} not found in CWD ({Path.cwd()}) or workspace ({workspace})"
+        f"firmware {firmware!r} not found in CWD ({cwd}) or workspace ({workspace})"
     )

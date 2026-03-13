@@ -19,21 +19,15 @@ if [[ ! -x "$VENV_PYTHON" ]]; then
     exit 1
 fi
 
-ORG=$("$VENV_PYTHON" -c "
-import yaml, pathlib, sys
-cfg = yaml.safe_load(pathlib.Path('${CONFIG_PATH}').read_text())
-print(cfg.get('runner', {}).get('org', 'Aharoni-Lab'))
-")
-
-# Build labels: start with config labels, ensure bench_name is included
-LABELS=$("$VENV_PYTHON" -c "
+read -r ORG LABELS < <("$VENV_PYTHON" -c "
 import yaml, pathlib
 cfg = yaml.safe_load(pathlib.Path('${CONFIG_PATH}').read_text())
+org = cfg.get('runner', {}).get('org', 'Aharoni-Lab')
 labels = cfg.get('runner', {}).get('labels', ['self-hosted', 'linux', 'ARM64', 'hil'])
 bench = cfg.get('bench_name', '${BENCH_NAME}')
 if bench not in labels:
     labels.append(bench)
-print(','.join(labels))
+print(org, ','.join(labels))
 ")
 
 echo "--- Installing GitHub Actions runner (org: ${ORG}) ---"
@@ -80,12 +74,8 @@ fi
 
 # ── Write .env so runner jobs see the venv on PATH ───────────────────────
 
-cat > "$RUNNER_DIR/.env" <<ENVEOF
-PATH=${VENV}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-VIRTUAL_ENV=${VENV}
-HIL_BENCH_CONFIG=${CONFIG_PATH}
-ENVEOF
-echo "Wrote ${RUNNER_DIR}/.env"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+"${SCRIPT_DIR}/write_runner_env.sh" "$RUNNER_DIR" "$VENV" "$CONFIG_PATH"
 
 # ── Install and start systemd service ────────────────────────────────────
 

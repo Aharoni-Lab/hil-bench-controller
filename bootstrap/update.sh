@@ -46,7 +46,12 @@ fi
 echo "--- Refreshing health timer ---"
 "${SCRIPT_DIR}/install_health_timer.sh" "$REPO_DIR"
 
-# ── 5. Done ──────────────────────────────────────────────────────────────
+# ── 5. Refresh udev rules ─────────────────────────────────────────────
+
+echo "--- Refreshing udev rules ---"
+"${SCRIPT_DIR}/install_udev_rules.sh" "$REPO_DIR"
+
+# ── 6. Done ──────────────────────────────────────────────────────────────
 
 echo ""
 echo "=== Update complete ==="

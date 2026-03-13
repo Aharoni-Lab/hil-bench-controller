@@ -10,6 +10,7 @@ from hilbench.health import (
     check_gpio_chip,
     check_runner_service,
     run_all_checks,
+    run_checks,
 )
 
 if TYPE_CHECKING:
@@ -41,3 +42,34 @@ class TestHealthChecks:
         assert len(results) >= 4
         names = [r.name for r in results]
         assert "config" in names
+
+    def test_run_checks_filtered(self, sample_config: BenchConfig) -> None:
+        """Only config check runs when filtered to ['config']."""
+        results = run_checks(sample_config, categories=["config"])
+        assert len(results) == 1
+        assert results[0].name == "config"
+        assert results[0].passed
+
+    def test_run_checks_multiple_categories(self, sample_config: BenchConfig) -> None:
+        """Multiple categories run their respective checks."""
+        with patch("hilbench.health.probe_factory") as mock_pf:
+            mock_probe = type("P", (), {"is_connected": lambda self: False})()
+            mock_pf.return_value = mock_probe
+            results = run_checks(sample_config, categories=["config", "probe"])
+
+        names = [r.name for r in results]
+        assert "config" in names
+        assert any(n.startswith("probe:") for n in names)
+        # serial, gpio_chip, runner_service should NOT be present
+        assert not any(n.startswith("serial:") for n in names)
+        assert "gpio_chip" not in names
+        assert "runner_service" not in names
+
+    def test_run_checks_none_means_all(self, sample_config: BenchConfig) -> None:
+        """Passing categories=None runs all checks (same as run_all_checks)."""
+        with patch("hilbench.health.probe_factory") as mock_pf:
+            mock_probe = type("P", (), {"is_connected": lambda self: False})()
+            mock_pf.return_value = mock_probe
+            results = run_checks(sample_config, categories=None)
+
+        assert len(results) >= 4

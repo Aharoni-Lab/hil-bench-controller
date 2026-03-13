@@ -8,9 +8,11 @@ on:
     branches: [main]
   pull_request:
 
-# Only one HIL test per bench at a time
+# Only one HIL test per bench at a time.
+# Use the bench_name from your config as the concurrency group to ensure
+# multiple repos sharing a bench don't run simultaneously.
 concurrency:
-  group: hil-samd51-bench01
+  group: hil-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -33,13 +35,16 @@ jobs:
 
   hil-test:
     needs: build
-    # Target a specific bench by its runner labels
-    runs-on: [self-hosted, linux, ARM64, hil, samd51, bench01]
+    # Use your bench_name as a label — install_runner.sh adds it automatically
+    runs-on: [self-hosted, hil, my-bench-01]
     timeout-minutes: 10
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: firmware
+
+      - name: Bench health check
+        run: benchctl health --check config --check probe
 
       - name: Flash firmware
         run: |

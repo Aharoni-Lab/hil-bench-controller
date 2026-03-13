@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 from hilbench.probe import probe_factory
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from hilbench.config import BenchConfig
 
 logger = logging.getLogger(__name__)
@@ -96,12 +98,30 @@ def check_runner_service() -> CheckResult:
     )
 
 
+_CHECK_RUNNERS: dict[str, Callable[[BenchConfig], list[CheckResult]]] = {
+    "config": lambda cfg: [check_config(cfg)],
+    "probe": check_probe,
+    "serial": check_serial,
+    "gpio_chip": lambda cfg: [check_gpio_chip()],
+    "runner_service": lambda cfg: [check_runner_service()],
+}
+
+CHECK_CATEGORIES: list[str] = list(_CHECK_RUNNERS.keys())
+
+
+def run_checks(
+    config: BenchConfig,
+    categories: list[str] | None = None,
+) -> list[CheckResult]:
+    """Run health checks, optionally filtered to specific categories."""
+    selected = categories if categories else CHECK_CATEGORIES
+    results: list[CheckResult] = []
+    for cat in selected:
+        runner = _CHECK_RUNNERS[cat]
+        results.extend(runner(config))
+    return results
+
+
 def run_all_checks(config: BenchConfig) -> list[CheckResult]:
     """Run all health checks and return results."""
-    results: list[CheckResult] = []
-    results.append(check_config(config))
-    results.extend(check_probe(config))
-    results.extend(check_serial(config))
-    results.append(check_gpio_chip())
-    results.append(check_runner_service())
-    return results
+    return run_checks(config)

@@ -115,6 +115,14 @@ class TestCli:
         # Should fail — no config at default path
         assert result.exit_code != 0
 
+    def test_health_check_config_only(self, sample_config_path: Path) -> None:
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["--config", str(sample_config_path), "health", "--check", "config"]
+        )
+        assert result.exit_code == 0
+        assert "config" in result.output
+
     def test_publish_config_no_env(self) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, ["publish", "config"])

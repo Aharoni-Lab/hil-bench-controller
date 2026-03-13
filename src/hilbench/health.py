@@ -6,12 +6,13 @@ import logging
 import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from hilbench.probe import probe_factory
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from hilbench.config import BenchConfig
 
 logger = logging.getLogger(__name__)

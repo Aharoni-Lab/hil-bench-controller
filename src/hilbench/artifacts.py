@@ -49,13 +49,15 @@ def resolve_firmware_path(
     if len(cwd_matches) == 1:
         return cwd_matches[0]
     if len(cwd_matches) > 1:
-        raise ArtifactError(f"ambiguous firmware path {firmware!r}: matched {len(cwd_matches)} files in CWD")
+        msg = f"ambiguous firmware path {firmware!r}: matched {len(cwd_matches)} files in CWD"
+        raise ArtifactError(msg)
 
     ws_matches = sorted(workspace.glob(pattern))
     if len(ws_matches) == 1:
         return ws_matches[0]
     if len(ws_matches) > 1:
-        raise ArtifactError(f"ambiguous firmware path {firmware!r}: matched {len(ws_matches)} files in workspace")
+        msg = f"ambiguous firmware path {firmware!r}: matched {len(ws_matches)} files in workspace"
+        raise ArtifactError(msg)
 
     raise ArtifactError(
         f"firmware {firmware!r} not found in CWD ({cwd}) or workspace ({workspace})"

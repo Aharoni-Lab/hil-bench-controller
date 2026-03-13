@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 from hilbench.artifacts import resolve_firmware_path
 from hilbench.exceptions import ArtifactError
@@ -17,7 +20,9 @@ class TestResolveFirmwarePath:
         result = resolve_firmware_path(str(fw), workspace=tmp_path / "ws")
         assert result == fw
 
-    def test_cwd_takes_priority_over_workspace(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_cwd_takes_priority_over_workspace(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """A file in CWD is found before the workspace is checked."""
         cwd_dir = tmp_path / "cwd"
         ws_dir = tmp_path / "ws"
@@ -61,7 +66,9 @@ class TestResolveFirmwarePath:
         result = resolve_firmware_path("*.elf", workspace=ws_dir)
         assert result == cwd_fw
 
-    def test_glob_workspace_fallback(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_glob_workspace_fallback(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Glob falls back to workspace when no CWD matches."""
         cwd_dir = tmp_path / "cwd"
         ws_dir = tmp_path / "ws"

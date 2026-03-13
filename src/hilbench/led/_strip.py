@@ -29,7 +29,7 @@ class Ws281xStrip:
         gpio_pin: int = 18,
         brightness: int = 128,
     ) -> None:
-        from rpi_ws281x import PixelStrip  # type: ignore[import-untyped]
+        from rpi_ws281x import PixelStrip
 
         self._strip = PixelStrip(led_count, gpio_pin, brightness=brightness)
         self._strip.begin()
@@ -40,7 +40,7 @@ class Ws281xStrip:
         return self._led_count
 
     def set_pixel(self, index: int, r: int, g: int, b: int) -> None:
-        from rpi_ws281x import Color  # type: ignore[import-untyped]
+        from rpi_ws281x import Color
 
         self._strip.setPixelColor(index, Color(r, g, b))
 

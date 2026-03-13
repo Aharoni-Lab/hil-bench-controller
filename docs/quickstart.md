@@ -16,7 +16,7 @@ Shortest path from fresh Pi to working HIL bench.
 ```bash
 git clone https://github.com/Aharoni-Lab/hil-bench-controller.git
 cd hil-bench-controller
-sudo ./bootstrap/bootstrap_pi.sh my-bench-01 ghp_YOUR_TOKEN
+sudo ./bootstrap/bootstrap_pi.sh my-bench-01 YOUR_RUNNER_TOKEN
 ```
 
 This installs system packages, builds edbg, creates a Python venv, registers a GitHub Actions runner at org scope, and generates `/etc/hil-bench/config.yaml`.

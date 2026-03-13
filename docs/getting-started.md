@@ -43,10 +43,34 @@ computer (available for Windows, macOS, and Linux).
 5. Click **Choose Storage** → select your SD card.
 6. Click **Next**, then click **Edit Settings** when prompted.
 
-### 2c. Customize OS settings (important)
+### 2c. Choose a bench name
+
+Before flashing, pick a **unique bench name** for this Pi. The name is used in several
+places:
+
+- **Pi hostname** — so you can `ssh` to it by name (e.g. `ssh pi@my-bench.local`)
+- **`bench_name`** in `/etc/hil-bench/config.yaml` — identifies this bench in logs and
+  health reports
+- **GitHub Actions runner name** — how the runner appears in your org's runner list
+- **Runner labels** — the name is split on hyphens and added as labels (e.g.
+  `samd51-bench-03` adds labels `samd51`, `bench`, `03`)
+- **Supabase dashboard** — if using the optional dashboard, this is the bench identifier
+
+Pick something descriptive that won't collide with other benches. Good examples:
+
+| Name | When to use |
+|------|-------------|
+| `samd51-bench-01` | First SAMD51 bench |
+| `miniscope-hil-east` | Location-based naming |
+| `dev-bench-alice` | Personal dev bench |
+
+Avoid generic names like `hil-bench-01` — if your lab has multiple benches, they'll
+collide.
+
+### 2d. Customize OS settings (important)
 
 In the **General** tab:
-- **Set hostname**: e.g. `hil-bench-01`
+- **Set hostname**: use your chosen bench name (e.g. `samd51-bench-01`)
 - **Set username and password**: e.g. `pi` / pick a strong password
 - **Configure wireless LAN**: enter your WiFi SSID and password (skip if using Ethernet)
 - **Set locale settings**: your timezone and keyboard layout
@@ -71,8 +95,8 @@ Click **Save**, then **Yes** to flash. Wait for it to finish and verify.
 From your computer:
 
 ```bash
-# If you set the hostname to hil-bench-01:
-ping hil-bench-01.local
+# If you set the hostname to samd51-bench-01:
+ping samd51-bench-01.local
 
 # Or scan your network (install nmap if needed):
 nmap -sn 192.168.1.0/24 | grep -i raspberry
@@ -84,13 +108,13 @@ Pi's IP address.
 ### SSH in
 
 ```bash
-ssh pi@hil-bench-01.local
+ssh pi@samd51-bench-01.local
 # Enter the password you set in Pi Imager
 ```
 
 > **Tip**: If you plan to SSH frequently, copy your public key now:
 > ```bash
-> ssh-copy-id pi@hil-bench-01.local
+> ssh-copy-id pi@samd51-bench-01.local
 > ```
 
 ---
@@ -172,15 +196,15 @@ cd hil-bench-controller
 Without GitHub Actions runner (you can add it later):
 
 ```bash
-sudo ./bootstrap/bootstrap_pi.sh hil-bench-01
+sudo ./bootstrap/bootstrap_pi.sh samd51-bench-01
 ```
 
 With GitHub Actions runner registration:
 
 ```bash
 # Generate a runner registration token at:
-# https://github.com/organizations/Aharoni-Lab/settings/actions/runners/new
-sudo ./bootstrap/bootstrap_pi.sh hil-bench-01 ghp_YOUR_TOKEN
+# https://github.com/organizations/<your-org>/settings/actions/runners/new
+sudo ./bootstrap/bootstrap_pi.sh samd51-bench-01 YOUR_TOKEN your-github-org
 ```
 
 The bootstrap script runs these steps in order (each is idempotent):

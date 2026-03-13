@@ -17,7 +17,6 @@ ENV_CONFIG_VAR = "HIL_BENCH_CONFIG"
 
 
 class RunnerConfig(BaseModel):
-    org: str = "Aharoni-Lab"
     labels: list[str] = Field(default_factory=lambda: ["self-hosted", "linux", "ARM64", "hil"])
 
 

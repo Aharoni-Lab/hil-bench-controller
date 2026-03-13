@@ -6,7 +6,6 @@ bench_name: my-bench-01          # unique bench identifier
 hostname: my-bench-01            # optional — set by bootstrap
 
 runner:
-  org: my-github-org                # GitHub org for the runner
   labels:
     - self-hosted
     - linux

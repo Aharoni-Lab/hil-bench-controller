@@ -2,15 +2,16 @@
 # Master bootstrap script for HIL bench Raspberry Pi 5.
 # Idempotent — safe to re-run.
 #
-# Usage: sudo ./bootstrap_pi.sh <bench-name> [github-org-token]
-# Example: sudo ./bootstrap_pi.sh aharoni-samd51-bench-01 ghp_xxxx
+# Usage: sudo ./bootstrap_pi.sh <bench-name> [github-org-token] [github-org] [supabase-url] [supabase-key]
+# Example: sudo ./bootstrap_pi.sh hil-bench-01 ghp_xxxx Miniscope
 
 set -euo pipefail
 
-BENCH_NAME="${1:?Usage: $0 <bench-name> [github-org-token] [supabase-url] [supabase-key]}"
+BENCH_NAME="${1:?Usage: $0 <bench-name> [github-org-token] [github-org] [supabase-url] [supabase-key]}"
 GITHUB_TOKEN="${2:-}"
-SUPABASE_URL="${3:-}"
-SUPABASE_KEY="${4:-}"
+GITHUB_ORG="${3:-}"
+SUPABASE_URL="${4:-}"
+SUPABASE_KEY="${5:-}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
@@ -26,11 +27,14 @@ echo ""
 "${SCRIPT_DIR}/generate_local_config.sh" "$BENCH_NAME" "$REPO_DIR"
 "${SCRIPT_DIR}/install_health_timer.sh" "$REPO_DIR"
 
-if [[ -n "$GITHUB_TOKEN" ]]; then
-    "${SCRIPT_DIR}/install_runner.sh" "$BENCH_NAME" "$GITHUB_TOKEN" /etc/hil-bench/config.yaml
+if [[ -n "$GITHUB_TOKEN" ]] && [[ -n "$GITHUB_ORG" ]]; then
+    "${SCRIPT_DIR}/install_runner.sh" "$BENCH_NAME" "$GITHUB_TOKEN" "$GITHUB_ORG"
+elif [[ -n "$GITHUB_TOKEN" ]] && [[ -z "$GITHUB_ORG" ]]; then
+    echo "--- Skipping runner install (token provided but no org) ---"
+    echo "Run manually: sudo ${SCRIPT_DIR}/install_runner.sh $BENCH_NAME <token> <github-org>"
 else
     echo "--- Skipping runner install (no token provided) ---"
-    echo "Run manually: sudo ${SCRIPT_DIR}/install_runner.sh $BENCH_NAME <token>"
+    echo "Run manually: sudo ${SCRIPT_DIR}/install_runner.sh $BENCH_NAME <token> <github-org>"
 fi
 
 if [[ -n "$SUPABASE_URL" ]] && [[ -n "$SUPABASE_KEY" ]]; then

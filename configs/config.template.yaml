@@ -35,6 +35,23 @@ targets:
       type: none                 # none or relay
       relay_pin: null            # e.g. { line: 4 } if type=relay
 
+  # Example: Grand Central M4 with native USB CDC serial
+  # grand_central_m4:
+  #   family: samd51
+  #   probe:
+  #     type: edbg
+  #     device_path: /dev/atmel-ice-0
+  #   serial:
+  #     device_path: /dev/serial/by-id/usb-Miniscope_Miniscope_CDC_*-if00  # unique per MCU
+  #     baud_rate: 115200
+  #     timeout: 1.0
+  #   gpio:
+  #     reset: { line: 17 }
+  #     ready: { line: 27 }
+  #     fault: { line: 22 }
+  #   power:
+  #     type: none
+
 paths:
   workspace: /opt/hil-bench
   log_dir: /var/log/hil-bench

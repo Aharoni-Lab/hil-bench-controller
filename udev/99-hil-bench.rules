@@ -11,3 +11,9 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="03eb", ATTR{idProduct}=="2141", \
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", \
     MODE="0666", \
     TAG+="hil-bench"
+
+# Miniscope USB CDC devices (VID:PID cafe:4001)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="cafe", ATTRS{idProduct}=="4001", \
+    MODE="0666", \
+    SYMLINK+="miniscope-cdc-%n", \
+    TAG+="hil-bench"

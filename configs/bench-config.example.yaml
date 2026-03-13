@@ -6,14 +6,14 @@ runner:
   labels: [self-hosted, linux, ARM64, hil, samd51, bench01]
 
 targets:
-  samd51:
+  grand_central_m4:
     family: samd51
     probe:
       type: edbg
       device_path: /dev/atmel-ice-0
       serial_number: J41800000000
     serial:
-      device_path: /dev/serial/by-id/usb-FTDI-if00
+      device_path: /dev/serial/by-id/usb-Miniscope_Miniscope_CDC_*-if00  # glob — resolve at deploy
       baud_rate: 115200
       timeout: 1.0
     gpio:

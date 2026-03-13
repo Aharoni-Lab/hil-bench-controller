@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 SAMPLE_CONFIG = {
     "bench_name": "test-bench-01",
     "hostname": "test-bench-01",
-    "runner": {"labels": ["self-hosted", "linux", "ARM64", "hil"]},
+    "runner": {"org": "test-org", "labels": ["self-hosted", "linux", "ARM64", "hil"]},
     "targets": {
         "samd51": {
             "family": "samd51",

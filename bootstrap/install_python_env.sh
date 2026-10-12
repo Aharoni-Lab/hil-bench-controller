@@ -17,7 +17,10 @@ else
 fi
 
 "$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel -q
-"$VENV_DIR/bin/pip" install -e "$REPO_DIR" -q
+# The "esp" extra pulls in esptool>=5 (ESP32 targets, probe type "esptool").
+# pip is a no-op when everything is already satisfied, so this stays idempotent.
+"$VENV_DIR/bin/pip" install -e "${REPO_DIR}[esp]" -q
 
 echo "benchctl installed: $($VENV_DIR/bin/benchctl --version)"
+echo "esptool installed: $($VENV_DIR/bin/esptool version 2>&1 | tail -1)"
 echo "--- Python environment done ---"

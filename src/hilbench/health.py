@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from hilbench.probe import probe_factory
+from hilbench.serial_io import device_present
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -55,7 +56,7 @@ def check_serial(config: BenchConfig) -> list[CheckResult]:
     """Check serial device presence for each target."""
     results = []
     for name, target in config.targets.items():
-        exists = Path(target.serial.device_path).exists()
+        exists = device_present(target.serial.device_path)
         results.append(
             CheckResult(
                 name=f"serial:{name}",

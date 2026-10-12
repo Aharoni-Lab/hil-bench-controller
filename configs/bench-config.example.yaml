@@ -24,6 +24,32 @@ targets:
       type: none
       relay_pin: null
 
+  # Example: custom ESP32-C6 board with native USB Serial/JTAG (no USB-UART chip).
+  # One port (VID:PID 303a:1001) is both the esptool flash port and the console.
+  # It disappears and re-enumerates after flashing; benchctl waits for it.
+  # See docs/esp32-targets.md. UNTESTED on hardware.
+  # Uncomment to add this target; line numbers are examples, match your wiring.
+  # esp32c6_receiver:
+  #   family: esp32c6
+  #   probe:
+  #     type: esptool            # needs the "esp" extra (esptool>=5)
+  #     device_path: /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_*-if00  # glob; resolved at use
+  #     chip: esp32c6            # default
+  #     baud: 460800             # default; flash transfer speed
+  #     flash_offset: "0x0"      # default; merged image (bootloader+ptable+app) goes at 0x0 on C6
+  #   serial:
+  #     device_path: /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_*-if00
+  #     baud_rate: 115200        # cosmetic on USB CDC
+  #     timeout: 1.0
+  #   gpio:                      # Pi lines are 3.3 V, same as the ESP32-C6: no level shifting
+  #     hv_dis: { line: 5 }      # INPUT: DUT HV_DIS net; HIGH = APD high-voltage supply is OFF
+  #     reset: { line: 6 }       # drives DUT EN low via a transistor (open-drain style)
+  #     boot: { line: 13 }       # drives BOOT/IO9 low via a transistor
+  #     fault: { line: 19 }      # INPUT: DUT fault output
+  #   power:
+  #     type: relay
+  #     relay_pin: { line: 26 }  # example line; relay switches the DUT 5 V
+
 paths:
   workspace: /opt/hil-bench
   log_dir: /var/log/hil-bench

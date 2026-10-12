@@ -86,6 +86,41 @@ The build job uploads the firmware binary, and the HIL test job downloads it:
 4. **Check GPIO**: Verify no fault conditions
 5. **Report**: Exit code propagates to GitHub (0 = pass, nonzero = fail)
 
+## ESP-IDF Firmware (ESP32-C6)
+
+The receiver firmware repo uses a three-job workflow (`photodiode-lvds-receiver`,
+`.github/workflows/esp32-firmware.yml`). Pattern:
+
+1. `build` on `ubuntu-latest`: `espressif/esp-idf-ci-action@v1` with `esp_idf_version`,
+   `target: esp32c6` and `path` set to the project; then a merged image
+   (bootloader + partition table + app at offset 0x0) and an uploaded artifact.
+   Action inputs: <https://github.com/espressif/esp-idf-ci-action>.
+2. `host-tests` on `ubuntu-latest`: plain cmake + ctest, only if the project has a host test tree.
+3. `hil-test` on `[self-hosted, hil, esp32c6]`, gated by a repository variable so it does
+   nothing until a bench exists:
+
+```yaml
+hil-test:
+  needs: build
+  runs-on: [self-hosted, hil, esp32c6]
+  if: ${{ vars.HIL_ESP32C6_BENCH == 'true' }}   # Settings > Variables > Actions
+  concurrency: { group: hil-esp32c6-receiver, cancel-in-progress: false }
+  timeout-minutes: 15
+  steps:
+    - uses: actions/download-artifact@v4
+      with: { name: esp32-firmware }
+    - run: benchctl health --check config --check probe
+    - run: benchctl flash --firmware receiver-esp32c6-merged.bin --target esp32c6_receiver
+    - run: benchctl serial expect --target esp32c6_receiver --pattern "BOOT OK" --timeout 20
+    - run: benchctl gpio get --pin hv_dis --target esp32c6_receiver --expect high
+    - run: benchctl serial send --target esp32c6_receiver "selftest quick"
+    - run: benchctl serial expect --target esp32c6_receiver --pattern '"pass":true' --timeout 60
+```
+
+`benchctl flash` returns only after the USB console port has re-enumerated, and
+`benchctl serial` retries the open for a few seconds, so no sleeps are needed between
+steps. See [esp32-targets.md](esp32-targets.md). Untested on hardware.
+
 ## Multiple Benches
 
 For multiple benches, give each unique labels:

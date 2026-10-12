@@ -25,17 +25,31 @@ class GpioPin(BaseModel):
 
 
 class ProbeConfig(BaseModel):
-    type: str = Field(description="Probe type: edbg or openocd")
+    type: str = Field(description="Probe type: edbg, openocd or esptool")
     device_path: Path = Path("/dev/atmel-ice-0")
     serial_number: str | None = None
+    # esptool-only fields (ignored by edbg/openocd)
+    chip: str = "esp32c6"
+    baud: Annotated[int, Field(gt=0)] = 460800
+    flash_offset: str = "0x0"
 
     @field_validator("type")
     @classmethod
     def validate_probe_type(cls, v: str) -> str:
-        allowed = {"edbg", "openocd"}
+        allowed = {"edbg", "openocd", "esptool"}
         if v not in allowed:
             msg = f"probe type must be one of {allowed}, got {v!r}"
             raise ValueError(msg)
+        return v
+
+    @field_validator("flash_offset")
+    @classmethod
+    def validate_flash_offset(cls, v: str) -> str:
+        try:
+            int(v, 0)
+        except ValueError as exc:
+            msg = f"flash_offset must be an integer such as '0x0', got {v!r}"
+            raise ValueError(msg) from exc
         return v
 
 

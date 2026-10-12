@@ -6,8 +6,10 @@ import click
 from rich.console import Console
 
 from hilbench.artifacts import resolve_firmware_path
+from hilbench.exceptions import SerialError
 from hilbench.probe import probe_factory
 from hilbench.relay import RelayController
+from hilbench.serial_io import wait_for_port
 
 
 @click.command()
@@ -15,9 +17,21 @@ from hilbench.relay import RelayController
 @click.option("--target", "-t", "target_name", default=None, help="Target name from config.")
 @click.option("--verify/--no-verify", default=True, help="Verify after flash.")
 @click.option("--power-cycle", is_flag=True, help="Power-cycle target before flash.")
+@click.option(
+    "--wait-port",
+    type=float,
+    default=10.0,
+    show_default=True,
+    help="esptool probes: seconds to wait for the console port to re-enumerate after flashing.",
+)
 @click.pass_obj
 def flash(
-    ctx: object, firmware: str, target_name: str | None, verify: bool, power_cycle: bool
+    ctx: object,
+    firmware: str,
+    target_name: str | None,
+    verify: bool,
+    power_cycle: bool,
+    wait_port: float,
 ) -> None:
     """Flash firmware to a target MCU via probe."""
     from hilbench.cli.main import Context
@@ -78,3 +92,13 @@ def flash(
         pass
 
     console.print(f"[green]Success:[/green] {result.message} ({result.duration_s:.1f}s)")
+
+    # The ESP32 USB Serial/JTAG port disappears and comes back after the hard
+    # reset; do not return until the console port is usable again.
+    if target.probe.type == "esptool":
+        console.print(f"Waiting for {target.serial.device_path} (up to {wait_port:g}s)...")
+        if not wait_for_port(target.serial.device_path, timeout=wait_port):
+            raise SerialError(
+                f"console port {target.serial.device_path} did not reappear within {wait_port:g}s"
+            )
+        console.print("Console port is back.")

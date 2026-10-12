@@ -21,7 +21,7 @@ echo ""
 
 if [[ -d "$VENV" ]]; then
     echo "--- Updating benchctl in venv ---"
-    "${VENV}/bin/pip" install --quiet -e "$REPO_DIR"
+    "${VENV}/bin/pip" install --quiet -e "${REPO_DIR}[esp]"
     echo "benchctl updated"
 else
     echo "WARNING: venv not found at ${VENV} — run install_python_env.sh first"

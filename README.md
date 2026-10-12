@@ -6,9 +6,9 @@ Turns a Raspberry Pi 5 into a self-hosted GitHub Actions runner that can flash M
 
 ## Features
 
-- **Flash firmware** via Atmel-ICE (edbg) or OpenOCD
+- **Flash firmware** via Atmel-ICE (edbg), OpenOCD, or esptool for ESP32 targets over native USB (see [docs/esp32-targets.md](docs/esp32-targets.md))
 - **Serial communication** — listen, send, and pattern-match (`expect`)
-- **GPIO control** — set, get, pulse pins (libgpiod/gpiod, Pi 5 compatible)
+- **GPIO control** — set, get (with `--expect high|low` for CI assertions), pulse pins (libgpiod/gpiod, Pi 5 compatible)
 - **Health monitoring** — probe, serial, GPIO, and runner status checks
 - **CI integration** — org-level GitHub Actions runner with example workflows
 - **Idempotent bootstrap** — single script to provision a fresh Pi
@@ -74,7 +74,7 @@ hil-test:
 ## Development
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev]"   # add ,esp for the esptool probe (esptool>=5)
 ruff check src/ tests/
 pytest -m "not hardware"
 ```
@@ -84,7 +84,7 @@ pytest -m "not hardware"
 ```
 src/hilbench/          Python package
   config.py            Pydantic config models + YAML loader
-  probe.py             edbg/OpenOCD flash abstraction
+  probe.py             edbg/OpenOCD/esptool flash abstraction
   serial_io.py         pyserial wrapper
   gpio.py              gpiod (libgpiod) wrapper
   relay.py             Power relay control (stubbed)

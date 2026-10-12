@@ -16,8 +16,15 @@ def serial() -> None:
 @serial.command()
 @click.option("--target", "-t", "target_name", default=None, help="Target name from config.")
 @click.option("--duration", "-d", type=float, default=10.0, help="Listen duration in seconds.")
+@click.option(
+    "--wait-port",
+    type=float,
+    default=5.0,
+    show_default=True,
+    help="Seconds to keep retrying if the port is not present yet (e.g. after a flash).",
+)
 @click.pass_obj
-def listen(ctx: object, target_name: str | None, duration: float) -> None:
+def listen(ctx: object, target_name: str | None, duration: float, wait_port: float) -> None:
     """Listen to serial output from a target."""
     from hilbench.cli.main import Context
 
@@ -33,7 +40,7 @@ def listen(ctx: object, target_name: str | None, duration: float) -> None:
         )
         return
 
-    port = PySerialPort(target.serial)
+    port = PySerialPort(target.serial, wait_port=wait_port)
     console.print(
         f"Listening on [bold]{target.serial.device_path}[/bold] "
         f"@ {target.serial.baud_rate} baud ({duration}s)..."
@@ -46,8 +53,15 @@ def listen(ctx: object, target_name: str | None, duration: float) -> None:
 @serial.command()
 @click.option("--target", "-t", "target_name", default=None, help="Target name from config.")
 @click.argument("data")
+@click.option(
+    "--wait-port",
+    type=float,
+    default=5.0,
+    show_default=True,
+    help="Seconds to keep retrying if the port is not present yet (e.g. after a flash).",
+)
 @click.pass_obj
-def send(ctx: object, target_name: str | None, data: str) -> None:
+def send(ctx: object, target_name: str | None, data: str, wait_port: float) -> None:
     """Send data to target serial port."""
     from hilbench.cli.main import Context
 
@@ -62,7 +76,7 @@ def send(ctx: object, target_name: str | None, data: str) -> None:
         )
         return
 
-    port = PySerialPort(target.serial)
+    port = PySerialPort(target.serial, wait_port=wait_port)
     with port:
         port.send(data + "\n")
     console.print(f"Sent to {name}: {data!r}")
@@ -72,8 +86,17 @@ def send(ctx: object, target_name: str | None, data: str) -> None:
 @click.option("--target", "-t", "target_name", default=None, help="Target name from config.")
 @click.option("--pattern", "-p", required=True, help="Regex pattern to match.")
 @click.option("--timeout", type=float, default=10.0, help="Timeout in seconds.")
+@click.option(
+    "--wait-port",
+    type=float,
+    default=5.0,
+    show_default=True,
+    help="Seconds to keep retrying if the port is not present yet (e.g. after a flash).",
+)
 @click.pass_obj
-def expect(ctx: object, target_name: str | None, pattern: str, timeout: float) -> None:
+def expect(
+    ctx: object, target_name: str | None, pattern: str, timeout: float, wait_port: float
+) -> None:
     """Wait for a serial line matching a regex pattern."""
     from hilbench.cli.main import Context
 
@@ -89,7 +112,7 @@ def expect(ctx: object, target_name: str | None, pattern: str, timeout: float) -
         )
         return
 
-    port = PySerialPort(target.serial)
+    port = PySerialPort(target.serial, wait_port=wait_port)
     console.print(f"Waiting for [bold]{pattern}[/bold] on {name} (timeout={timeout}s)...")
     with port:
         matched = port.expect(pattern, timeout=timeout)

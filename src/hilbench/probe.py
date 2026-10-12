@@ -1,4 +1,4 @@
-"""Flash probe abstraction for edbg and OpenOCD."""
+"""Flash probe abstraction for edbg, OpenOCD and esptool."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol
 
 from hilbench.exceptions import FlashError, ProbeError
+from hilbench.serial_io import device_present, resolve_device_path
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -125,6 +126,55 @@ class OpenOCDProbe:
         return _run_flash(cmd, "openocd", output_field="stderr")
 
 
+class EsptoolProbe:
+    """ESP32-family flashing over the chip's native USB Serial/JTAG port via ``esptool``.
+
+    The same CDC-ACM port is both the flash port and the console port. esptool
+    resets the chip into the ROM bootloader over that port (``--before usb-reset``),
+    so no BOOT/EN wiring is needed. After ``--after hard-reset`` the USB device
+    re-enumerates; callers wanting the console should use ``wait_for_port``.
+
+    Command spelling follows esptool v5 (hyphenated ``write-flash``, ``usb-reset``,
+    ``hard-reset``): https://docs.espressif.com/projects/esptool/en/latest/esp32c6/esptool/basic-commands.html
+    and the ``esptool --help`` output of v5.5.0. UNTESTED on hardware.
+
+    Verification: in esptool v5 ``write-flash`` always verifies written data
+    (MD5 of the flash region) and there is no ``--verify`` flag, so the *verify*
+    argument is accepted for Probe-protocol compatibility and is a no-op.
+    """
+
+    def __init__(self, config: ProbeConfig) -> None:
+        self.config = config
+
+    def is_connected(self) -> bool:
+        # Must not reset the chip: only check that the port node exists.
+        return device_present(self.config.device_path)
+
+    def describe_command(self, firmware: Path, *, verify: bool = True) -> list[str]:
+        port = resolve_device_path(self.config.device_path)
+        return [
+            "esptool",
+            "--chip",
+            self.config.chip,
+            "--port",
+            str(port),
+            "--baud",
+            str(self.config.baud),
+            "--before",
+            "usb-reset",
+            "--after",
+            "hard-reset",
+            "write-flash",
+            self.config.flash_offset,
+            str(firmware),
+        ]
+
+    def flash(self, firmware: Path, *, verify: bool = True) -> FlashResult:
+        cmd = self.describe_command(firmware, verify=verify)
+        logger.info("flashing via esptool: %s", " ".join(cmd))
+        return _run_flash(cmd, "esptool", output_field="stdout")
+
+
 def probe_factory(config: ProbeConfig) -> Probe:
     """Create the appropriate probe from config."""
     match config.type:
@@ -132,5 +182,7 @@ def probe_factory(config: ProbeConfig) -> Probe:
             return EdbgProbe(config)
         case "openocd":
             return OpenOCDProbe(config)
+        case "esptool":
+            return EsptoolProbe(config)
         case _:
             raise ProbeError(f"unknown probe type: {config.type!r}")

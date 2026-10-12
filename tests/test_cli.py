@@ -128,3 +128,70 @@ class TestCli:
         result = runner.invoke(cli, ["publish", "config"])
         assert result.exit_code == 0
         assert "not configured" in result.output.lower()
+
+
+class TestEspCli:
+    def _invoke(self, cfg: Path, *args: str):  # type: ignore[no-untyped-def]
+        return CliRunner().invoke(cli, ["--config", str(cfg), *args])
+
+    def test_gpio_get_expect(self, sample_config_path: Path) -> None:
+        from unittest.mock import patch
+
+        with patch("hilbench.cli.gpio_cmd.GpiodController") as ctrl:
+            ctrl.return_value.get_pin.return_value = True
+            ok = self._invoke(
+                sample_config_path, "gpio", "get", "--pin", "fault", "--expect", "high"
+            )
+            bad = self._invoke(
+                sample_config_path, "gpio", "get", "--pin", "fault", "--expect", "low"
+            )
+        assert ok.exit_code == 0
+        assert bad.exit_code == 1
+        assert "FAIL" in bad.output
+
+    def test_serial_wait_port_option_dry_run(self, sample_config_path: Path) -> None:
+        r = CliRunner().invoke(
+            cli,
+            ["--config", str(sample_config_path), "--dry-run", "serial", "expect",
+             "--pattern", "x", "--wait-port", "3"],
+        )  # fmt: skip
+        assert r.exit_code == 0
+
+    def test_flash_waits_for_port_on_esptool(self, tmp_path: Path) -> None:
+        from unittest.mock import patch
+
+        import yaml
+
+        from hilbench.probe import FlashResult
+
+        cfg = tmp_path / "c.yaml"
+        cfg.write_text(
+            yaml.dump(
+                {
+                    "bench_name": "b",
+                    "targets": {
+                        "e": {
+                            "family": "esp32c6",
+                            "probe": {"type": "esptool", "device_path": "/dev/ttyACM0"},
+                            "serial": {"device_path": "/dev/ttyACM0"},
+                        }
+                    },
+                    "paths": {"workspace": str(tmp_path), "log_dir": str(tmp_path)},
+                }
+            )
+        )
+        fw = tmp_path / "fw.bin"
+        fw.write_bytes(b"\x00")
+        with (
+            patch("hilbench.probe.EsptoolProbe.flash", return_value=FlashResult(True, "ok")),
+            patch("hilbench.cli.flash_cmd.wait_for_port", return_value=False) as wait,
+        ):
+            r = self._invoke(cfg, "flash", "--firmware", str(fw), "--wait-port", "2")
+        wait.assert_called_once()
+        assert r.exit_code != 0
+        with (
+            patch("hilbench.probe.EsptoolProbe.flash", return_value=FlashResult(True, "ok")),
+            patch("hilbench.cli.flash_cmd.wait_for_port", return_value=True),
+        ):
+            r = self._invoke(cfg, "flash", "--firmware", str(fw))
+        assert r.exit_code == 0, r.output

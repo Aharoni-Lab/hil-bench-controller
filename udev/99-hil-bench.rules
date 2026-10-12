@@ -17,3 +17,15 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="cafe", ATTRS{idProduct}=="4001", \
     MODE="0666", \
     SYMLINK+="miniscope-cdc-%n", \
     TAG+="hil-bench"
+
+# Espressif USB Serial/JTAG controller (ESP32-C3/C6/S3 built-in, VID:PID 303a:1001).
+# One CDC-ACM port is both the esptool flash port and the firmware console.
+# It re-enumerates after every reset/flash, so match on tty and use by-id paths in config.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="1001", \
+    MODE="0666", \
+    SYMLINK+="esp32-usbjtag-%n", \
+    TAG+="hil-bench"
+
+SUBSYSTEM=="usb", ATTR{idVendor}=="303a", ATTR{idProduct}=="1001", \
+    MODE="0666", \
+    TAG+="hil-bench"

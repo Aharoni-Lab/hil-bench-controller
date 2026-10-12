@@ -43,9 +43,16 @@ def set_pin(ctx: object, pin: str, value: str, target_name: str | None) -> None:
 @gpio.command("get")
 @click.option("--pin", "-p", required=True, help="Pin name or GPIO line number.")
 @click.option("--target", "-t", "target_name", default=None, help="Target name from config.")
+@click.option(
+    "--expect",
+    "expected",
+    type=click.Choice(["high", "low"]),
+    default=None,
+    help="Exit non-zero if the pin is not at this level.",
+)
 @click.pass_obj
-def get_pin(ctx: object, pin: str, target_name: str | None) -> None:
-    """Read a GPIO pin value."""
+def get_pin(ctx: object, pin: str, target_name: str | None, expected: str | None) -> None:
+    """Read a GPIO pin value (optionally asserting its level with --expect)."""
     from hilbench.cli.main import Context
 
     assert isinstance(ctx, Context)
@@ -55,13 +62,17 @@ def get_pin(ctx: object, pin: str, target_name: str | None) -> None:
     line = resolve_pin(pin, target.gpio)
 
     if ctx.dry_run:
-        console.print(f"[yellow]dry-run:[/yellow] would read GPIO {line} (pin={pin})")
+        suffix = f", expect {expected}" if expected else ""
+        console.print(f"[yellow]dry-run:[/yellow] would read GPIO {line} (pin={pin}){suffix}")
         return
 
     ctrl = GpiodController()
     val = ctrl.get_pin(line)
     label = "HIGH" if val else "LOW"
     console.print(f"GPIO {line} ({pin}) = [bold]{label}[/bold]")
+    if expected is not None and bool(val) != (expected == "high"):
+        console.print(f"[red]FAIL:[/red] expected {expected.upper()}, got {label}")
+        raise SystemExit(1)
 
 
 @gpio.command()

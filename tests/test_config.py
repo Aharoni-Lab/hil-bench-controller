@@ -89,3 +89,53 @@ class TestBenchConfig:
         _, target = sample_config.get_target()
         assert target.serial.baud_rate == 115200
         assert target.serial.timeout == 1.0
+
+
+class TestEsptoolConfig:
+    def test_esptool_defaults(self) -> None:
+        from hilbench.config import ProbeConfig
+
+        p = ProbeConfig(type="esptool", device_path="/dev/ttyACM0")  # type: ignore[arg-type]
+        assert (p.chip, p.baud, p.flash_offset) == ("esp32c6", 460800, "0x0")
+
+    def test_existing_probe_defaults_unchanged(self) -> None:
+        from hilbench.config import ProbeConfig
+
+        assert ProbeConfig(type="edbg").chip == "esp32c6"
+
+    def test_rejects_bad_flash_offset(self) -> None:
+        from pydantic import ValidationError
+
+        from hilbench.config import ProbeConfig
+
+        with pytest.raises(ValidationError):
+            ProbeConfig(type="esptool", flash_offset="zero")
+
+    def test_rejects_bad_baud(self) -> None:
+        from pydantic import ValidationError
+
+        from hilbench.config import ProbeConfig
+
+        with pytest.raises(ValidationError):
+            ProbeConfig(type="esptool", baud=0)
+
+    def test_esptool_target_from_dict(self) -> None:
+        from hilbench.config import BenchConfig
+
+        cfg = BenchConfig.model_validate(
+            {
+                "bench_name": "b",
+                "targets": {
+                    "esp32c6_receiver": {
+                        "family": "esp32c6",
+                        "probe": {
+                            "type": "esptool",
+                            "device_path": "/dev/serial/by-id/usb-Espressif_*-if00",
+                            "baud": 921600,
+                        },
+                        "serial": {"device_path": "/dev/serial/by-id/usb-Espressif_*-if00"},
+                    }
+                },
+            }
+        )
+        assert cfg.targets["esp32c6_receiver"].probe.baud == 921600

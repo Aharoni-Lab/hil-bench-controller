@@ -10,7 +10,7 @@ import pytest
 
 from hilbench.config import ProbeConfig
 from hilbench.exceptions import FlashError
-from hilbench.probe import EdbgProbe, OpenOCDProbe, probe_factory
+from hilbench.probe import EdbgProbe, EsptoolProbe, OpenOCDProbe, probe_factory
 
 
 @pytest.fixture()
@@ -135,3 +135,87 @@ class TestProbeFactory:
         object.__setattr__(config, "type", "jtag-magic")
         with pytest.raises(ProbeError, match="unknown probe type"):
             probe_factory(config)
+
+
+class TestEsptoolProbe:
+    @pytest.fixture()
+    def esp_config(self) -> ProbeConfig:
+        return ProbeConfig(type="esptool", device_path=Path("/dev/ttyACM0"))
+
+    def test_describe_command_defaults(self, esp_config: ProbeConfig) -> None:
+        cmd = EsptoolProbe(esp_config).describe_command(Path("fw.bin"))
+        assert cmd == [
+            "esptool",
+            "--chip",
+            "esp32c6",
+            "--port",
+            "/dev/ttyACM0",
+            "--baud",
+            "460800",
+            "--before",
+            "usb-reset",
+            "--after",
+            "hard-reset",
+            "write-flash",
+            "0x0",
+            "fw.bin",
+        ]
+
+    def test_describe_command_custom_fields(self) -> None:
+        cfg = ProbeConfig(
+            type="esptool",
+            device_path=Path("/dev/ttyACM1"),
+            chip="esp32s3",
+            baud=921600,
+            flash_offset="0x1000",
+        )
+        cmd = EsptoolProbe(cfg).describe_command(Path("a.bin"))
+        assert cmd[cmd.index("--chip") + 1] == "esp32s3"
+        assert cmd[cmd.index("--baud") + 1] == "921600"
+        assert cmd[cmd.index("write-flash") + 1] == "0x1000"
+
+    def test_verify_flag_is_noop(self, esp_config: ProbeConfig) -> None:
+        probe = EsptoolProbe(esp_config)
+        fw = Path("fw.bin")
+        assert probe.describe_command(fw, verify=True) == probe.describe_command(fw, verify=False)
+
+    def test_describe_command_resolves_glob(self, tmp_path: Path) -> None:
+        port = tmp_path / "usb-Espressif_X_AA-if00"
+        port.touch()
+        cfg = ProbeConfig(type="esptool", device_path=tmp_path / "usb-Espressif_*-if00")
+        cmd = EsptoolProbe(cfg).describe_command(Path("fw.bin"))
+        assert cmd[cmd.index("--port") + 1] == str(port)
+
+    def test_is_connected_does_not_run_subprocess(self, tmp_path: Path) -> None:
+        port = tmp_path / "ttyACM0"
+        port.touch()
+        probe = EsptoolProbe(ProbeConfig(type="esptool", device_path=port))
+        with patch("subprocess.run") as mock_run:
+            assert probe.is_connected()
+            port.unlink()
+            assert not probe.is_connected()
+        mock_run.assert_not_called()
+
+    def test_flash_success(self, esp_config: ProbeConfig, tmp_path: Path) -> None:
+        fw = tmp_path / "fw.bin"
+        fw.write_bytes(b"\x00")
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = subprocess.CompletedProcess(
+                args=[], returncode=0, stdout="Hash of data verified.", stderr=""
+            )
+            result = EsptoolProbe(esp_config).flash(fw)
+        assert result.success
+        assert result.command[0] == "esptool"
+
+    def test_flash_failure(self, esp_config: ProbeConfig, tmp_path: Path) -> None:
+        fw = tmp_path / "fw.bin"
+        fw.write_bytes(b"\x00")
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = subprocess.CompletedProcess(
+                args=[], returncode=2, stdout="", stderr="Failed to connect"
+            )
+            with pytest.raises(FlashError, match="esptool failed"):
+                EsptoolProbe(esp_config).flash(fw)
+
+    def test_factory(self, esp_config: ProbeConfig) -> None:
+        assert isinstance(probe_factory(esp_config), EsptoolProbe)

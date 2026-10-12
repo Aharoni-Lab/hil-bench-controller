@@ -35,6 +35,9 @@ jobs:
 
   hil-test:
     needs: build
+    # Never run fork PRs on the self-hosted bench (untrusted code). See
+    # docs/github-integration.md, "Self-hosted runner safety".
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
     # Use your bench_name as a label — install_runner.sh adds it automatically
     runs-on: [self-hosted, hil, my-bench-01]
     timeout-minutes: 10

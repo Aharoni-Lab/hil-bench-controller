@@ -103,7 +103,8 @@ The receiver firmware repo uses a three-job workflow (`photodiode-lvds-receiver`
 hil-test:
   needs: build
   runs-on: [self-hosted, hil, esp32c6]
-  if: ${{ vars.HIL_ESP32C6_BENCH == 'true' }}   # Settings > Variables > Actions
+  # Bench exists (repo variable) AND not a fork PR (see "Self-hosted runner safety")
+  if: ${{ vars.HIL_ESP32C6_BENCH == 'true' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) }}
   concurrency: { group: hil-esp32c6-receiver, cancel-in-progress: false }
   timeout-minutes: 15
   steps:
@@ -120,6 +121,25 @@ hil-test:
 `benchctl flash` returns only after the USB console port has re-enumerated, and
 `benchctl serial` retries the open for a few seconds, so no sleeps are needed between
 steps. See [esp32-targets.md](esp32-targets.md). Untested on hardware.
+
+## Self-hosted runner safety
+
+A workflow that runs on the bench executes whatever the pull request contains, on a machine
+wired to real hardware. Do not let untrusted code reach it:
+
+- Gate the HIL job so fork pull requests never run on the bench:
+  `if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}`
+  (combine with other conditions using `&&`, as in the ESP-IDF snippet above).
+- In the repository (or org) settings under Actions > General, set fork pull request
+  workflows to "Require approval for all outside collaborators".
+- Put the runner in a runner group limited to the intended repositories (org Settings >
+  Actions > Runner groups), not the default group open to every repository.
+- Consider registering the runner with `--ephemeral` (one job, then it deregisters). The
+  bootstrap does not do this: `install_runner.sh` registers one persistent runner under a
+  systemd service, and an ephemeral runner would need re-registration (a fresh token) after
+  every job, so it is a recommendation only.
+
+Reference: <https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/about-self-hosted-runners#self-hosted-runner-security>
 
 ## Multiple Benches
 
